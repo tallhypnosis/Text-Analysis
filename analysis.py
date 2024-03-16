@@ -11,7 +11,6 @@ def fetch_article_text(url):
     try:
         # Send a GET request to the URL
         response = requests.get(url)
-        print(f"{response.status_code}")
 
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
@@ -61,11 +60,9 @@ for index, row in data.iterrows():
     url = row['URL']
     print(f"Processing {url_id} {url}")
     article_title, article_text = fetch_article_text(url)
-    # print(article_text)
     if article_text:
         # Save article text to a text file
         with open(os.path.join(output_directory, f"{url_id}.txt"), "a+", encoding="utf-8") as f:
-            print(article_title)
             f.write(article_title + "\n" + "\n") # Write title
             f.write(article_text) # Write text
         print(f"Article text saved for {url_id}")
@@ -168,14 +165,14 @@ def calculated_variables(text, stop_words, master_dict):
 # Folder paths
 stop_words_dir = "StopWords"
 master_dict_dir = "MasterDictionary"
-extracted_articles_dir = "extracted_articles1"
+extracted_articles_dir = "extracted_articles"
 
 # Load stop words and master dictionary
 stop_words = load_stop_words(stop_words_dir)
 master_dict = load_master_dictionary(master_dict_dir, stop_words)
 
 # Output file path 
-output_file = 'Output_Data_Structure1.csv'
+output_file = 'Output_Data_Structure.csv'
 
 # Open output file for writing
 with open(output_file, 'w') as f:
@@ -195,7 +192,6 @@ with open(output_file, 'w') as f:
 
             # Calculate derived variables
             variables = calculated_variables(text, stop_words, master_dict)
-            print(variables)
 
             # Format derived variables
             formatted_variables = [
