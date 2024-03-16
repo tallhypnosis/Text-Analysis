@@ -1,8 +1,78 @@
 import os
+import pandas as pd
+import bs4 as BeautifulSoup
+import requests
 import re
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import cmudict
+
+def fetch_article_text(url):
+    try:
+        # Send a GET request to the URL
+        response = requests.get(url)
+        print(f"{response.status_code}")
+
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Parse the HTML content
+            soup = BeautifulSoup.BeautifulSoup(response.content, 'html.parser')
+            
+            # Find the article title
+            title_element = soup.select_one('div.td-full-screen-header-image-wrap h1')
+
+            # Find the article content
+            article_content = soup.find('div', class_='td-post-content tagdiv-type')
+            article_title = title_element.get_text() if title_element else "Title not found"
+
+            # Initialize an empty string to store the article text
+            article_text = ''
+            
+            # Extract text from paragraphs and ordered lists within the article content
+            if article_content:
+                for element in article_content.children:
+                    if element.name == 'p' or element.name == 'ol' or element.name =='pre' or element.name == 'ul':
+                        article_text += element.get_text(separator='\n') + '\n'
+                
+                # Return the article text
+                return article_title, article_text
+            else:
+                print("Article content not found.")
+                return None, None
+        else:
+            print(f"Failed to fetch {url}. Status code: {response.status_code}")
+            return None, None
+    except Exception as e:
+        print(f"Error occurred while fetching {url}:", e)
+        return None, None
+
+# Load URLs from Excel file
+input_file = 'Input.xlsx'
+data = pd.read_excel(input_file)
+
+# Create directory to save text files
+output_directory = 'extracted_articles1'
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
+
+# Iterate through each URL
+for index, row in data.iterrows():
+    url_id = row['URL_ID']
+    url = row['URL']
+    print(f"Processing {url_id} {url}")
+    article_title, article_text = fetch_article_text(url)
+    # print(article_text)
+    if article_text:
+        # Save article text to a text file
+        with open(os.path.join(output_directory, f"{url_id}.txt"), "a+", encoding="utf-8") as f:
+            print(article_title)
+            f.write(article_title + "\n" + "\n") # Write title
+            f.write(article_text) # Write text
+        print(f"Article text saved for {url_id}")
+    else:
+        print(f"Failed to fetch article text for {url_id}")
+
+print("Extraction completed.")
 
 # Download NLTK corpus
 nltk.download('punkt')
