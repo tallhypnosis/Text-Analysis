@@ -48,3 +48,4 @@ The derived variables and scores are saved to a CSV file for each article, with 
 Note
 Ensure that the MasterDictionary and StopWords directories containing the required dictionaries and stop words are present in the same directory as the script.
 Make sure that the extracted_articles directory is created to store the extracted article text files.
+The personal pronoun count is calculated before applying the stop word filter because once the stop word filter is applied, the personal pronouns may no longer be present in the text, resulting in a count of zero.
